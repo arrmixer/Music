@@ -45,6 +45,8 @@ public class Main {
 
         datasource.getCount(Datasource.TABLE_SONGS);
 
+        datasource.createViewForSongArtists();
+
         datasource.close();
     }
 }
