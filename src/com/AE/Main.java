@@ -5,6 +5,7 @@ import com.AE.Model.Datasource;
 import com.AE.Model.SongArtist;
 
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
 
@@ -46,6 +47,22 @@ public class Main {
         datasource.getCount(Datasource.TABLE_SONGS);
 
         datasource.createViewForSongArtists();
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter song title: ");
+
+        String title = scanner.nextLine();
+
+        artistsForSong = datasource.querySongInfoView(title);
+
+        if(artistsForSong.isEmpty()){
+            System.out.println("No songs!");
+            return;
+        }
+
+        for(SongArtist songArtist : artistsForSong){
+            System.out.println("From View: Artist name: " + songArtist.getArtistName() + ",  Album name: " + songArtist.getAlbumName() + ", Track number: " + songArtist.getTrack());
+        }
 
         datasource.close();
     }
