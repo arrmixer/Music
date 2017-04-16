@@ -51,18 +51,20 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter song title: ");
 
-        String title = scanner.nextLine();
+//        String title = scanner.nextLine();
+//
+//        artistsForSong = datasource.querySongInfoView(title);
+//
+//        if(artistsForSong.isEmpty()){
+//            System.out.println("No songs!");
+//            return;
+//        }
+//
+//        for(SongArtist songArtist : artistsForSong){
+//            System.out.println("From View: Artist name: " + songArtist.getArtistName() + ",  Album name: " + songArtist.getAlbumName() + ", Track number: " + songArtist.getTrack());
+//        }
 
-        artistsForSong = datasource.querySongInfoView(title);
-
-        if(artistsForSong.isEmpty()){
-            System.out.println("No songs!");
-            return;
-        }
-
-        for(SongArtist songArtist : artistsForSong){
-            System.out.println("From View: Artist name: " + songArtist.getArtistName() + ",  Album name: " + songArtist.getAlbumName() + ", Track number: " + songArtist.getTrack());
-        }
+        datasource.insertSong("Like A Rolling Stone", "Bob Dylan", "Bob Dylan's Greatest Hits", 5);
 
         datasource.close();
     }

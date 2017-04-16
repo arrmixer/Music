@@ -107,6 +107,9 @@ public class Datasource {
     public static final String QUERY_ALBUM = " SELECT " + COLUMN_ALBUM_ID + " FROM "
             + TABLE_ALBUMS + " WHERE " + COLUMN_ALBUM_NAME + " = ?";
 
+    public static final String QUERY_SONG = " SELECT " + COLUMN_SONG_ID + " FROM "
+            + TABLE_SONGS + " WHERE " + COLUMN_SONG_TITLE + " = ?";
+
     private Connection conn;
 
     private PreparedStatement querySongInfoView;
@@ -116,6 +119,7 @@ public class Datasource {
 
     private PreparedStatement queryAritst;
     private PreparedStatement queryAlbum;
+    private PreparedStatement querySong;
 
     public boolean open() {
         try {
@@ -126,6 +130,8 @@ public class Datasource {
             insertIntoSongs = conn.prepareStatement(INSERT_SONGS);
             queryAritst = conn.prepareStatement(QUERY_ARTIST);
             queryAlbum = conn.prepareStatement(QUERY_ALBUM);
+            querySong = conn.prepareStatement(QUERY_SONG);
+
 
             return true;
         } catch (SQLException e) {
@@ -160,6 +166,10 @@ public class Datasource {
 
             if (queryAlbum != null) {
                 queryAlbum.close();
+            }
+
+            if (querySong != null){
+                querySong.close();
             }
 
             if (conn != null) {
@@ -390,43 +400,57 @@ public class Datasource {
         }
     }
 
-    private void insertSong(String title, String artist, String album, int track) {
+    public void insertSong(String title, String artist, String album, int track) {
 
-        try {
-            conn.setAutoCommit(false);
+                try {
 
-            int artistId = insertArtist(artist);
-            int albumId = insertAlbum(album, artistId);
-            insertIntoSongs.setInt(1, track);
-            insertIntoSongs.setString(2, title);
-            insertIntoSongs.setInt(3, albumId);
-            int affectedRows = insertIntoSongs.executeUpdate();
+                    querySong.setString(1, title);
+                    ResultSet results = querySong.executeQuery();
+                    if(results.next()) {
+                        return;
+                    }
+                    conn.setAutoCommit(false);
 
-            if (affectedRows == 1) {
-                conn.commit();
-            } else {
-                throw new SQLException("The song insert failed");
+                    querySong.execute(title);
+
+                    int artistId = insertArtist(artist);
+                    int albumId = insertAlbum(album, artistId);
+
+                    insertIntoSongs.setInt(1, track);
+                    insertIntoSongs.setString(2, title);
+                    insertIntoSongs.setInt(3, albumId);
+                    int affectedRows = insertIntoSongs.executeUpdate();
+
+                    if (affectedRows == 1) {
+                        conn.commit();
+
+                    } else {
+                        throw new SQLException("The song insert failed");
+                    }
+                } catch (SQLException e) {
+                    System.out.println("Insert song exception: " + e.getMessage());
+                    try {
+                        System.out.println("Performing rollback");
+                        conn.rollback();
+                    } catch (SQLException e2) {
+                        System.out.println("Oh boy! Things are really bad! " + e2.getMessage());
+
+                    }
+                } finally
+
+                {
+                    try {
+                        System.out.println("Resetting default commit behavior");
+                        conn.setAutoCommit(true);
+                    } catch (SQLException e) {
+                        System.out.println("Couldn't reset auto-commit!" + e.getMessage());
+                    }
+                }
+
             }
-        } catch (SQLException e) {
-            System.out.println("Insert song exception: " + e.getMessage());
-            try {
-                System.out.println("Performing rollback");
-                conn.rollback();
-            } catch (SQLException e2) {
-                System.out.println("Oh boy! Things are really bad! " + e2.getMessage());
-
-            }
-        } finally
-
-        {
-            try {
-                System.out.println("Resetting default commit behavior");
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                System.out.println("Couldn't reset auto-commit!" + e.getMessage());
-            }
-        }
 
     }
 
-}
+
+
+
